@@ -150,9 +150,8 @@ namespace dnSpy.Debugger.DbgUI {
 
 		public override bool CanDetachAll => CanExecutePauseOrRunningCommand;
 		public override void DetachAll() {
-			if (!dbgManager.Value.CanDetachWithoutTerminating) {
-				//TODO: Show a msg box
-			}
+			if (!dbgManager.Value.CanDetachWithoutTerminating && messageBoxService.Value.Show(dnSpy_Debugger_Resources.DetachingWillCauseTerminationOfDebuggeeProcess, MsgBoxButton.Yes | MsgBoxButton.No) != MsgBoxButton.Yes)
+				return;
 			dbgManager.Value.DetachAll();
 		}
 
@@ -459,6 +458,10 @@ namespace dnSpy.Debugger.DbgUI {
 			sb.AppendLine(string.Format(dnSpy_Debugger_Resources.ExceptionName, dbgExceptionFormatterService.Value.ToString(exm.Exception.Id)));
 			sb.AppendLine();
 			sb.AppendLine(string.Format(dnSpy_Debugger_Resources.ExceptionMessage, exm.Exception.Message ?? dnSpy_Debugger_Resources.ExceptionMessageIsNull));
+			if (exm.Exception.HResult.HasValue) {
+				sb.AppendLine();
+				sb.AppendLine(string.Format(dnSpy_Debugger_Resources.ExceptionHResult, exm.Exception.HResult.Value));
+			}
 			ShowError_UI(sb.ToString());
 		}
 
